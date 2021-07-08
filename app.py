@@ -32,8 +32,11 @@ def send_event():
 
     list_of_dict = json.load(StringIO(request.data.decode('utf-8')))
 
+
     if len(list_of_dict['data']) == 0:
-        return 'no data'
+        response =  jsonify(message="no data")
+        response.headers.add("Access-Control-Allow-Origin", "*")
+        return response
     else:
         session_id = uuid.uuid4()
         mycol = mydb[list_of_dict['source']]
@@ -41,7 +44,9 @@ def send_event():
             # print(dict.dtype)
             dict['sessionID'] = session_id
             mycol.insert_one(copy.deepcopy(dict))
-        return 'success'
+        response = jsonify(message="success")
+        response.headers.add("Access-Control-Allow-Origin", "*")
+        return response
 
 
 @app.route('/test', methods=['GET'])
@@ -70,26 +75,26 @@ def test_retrieve():
 
     return "<pre>{}</pre>".format(json.dumps(new_event_list, indent=4))
 
-@app.route('/action', methods=['POST'])
-@cross_origin()
-def send_action():
-    uri = "mongodb://tianyumongo:VvzxetVYlugFvqcvGeQFsY0roLS4Wy90VzwdPVf10jqnhds4ND8zoQrSOBbZvlWewJmFaff9uDxC73ZXfOovXw==@tianyumongo.mongo.cosmos.azure.com:10255/?ssl=true&retrywrites=false&replicaSet=globaldb&maxIdleTimeMS=120000&appName=@tianyumongo@"
-    client = pymongo.MongoClient(uri)
-
-    mydb = client["test-database"]
-
-    list_of_dict = json.load(StringIO(request.data.decode('utf-8')))
-
-    if len(list_of_dict['data']) == 0:
-        return 'no data'
-    else:
-        session_id = uuid.uuid4()
-        mycol = mydb[list_of_dict['source']]
-        for dict in list_of_dict['data']:
-            # print(dict.dtype)
-            dict['sessionID'] = session_id
-            mycol.insert_one(copy.deepcopy(dict))
-        return 'success'
+# @app.route('/action', methods=['POST'])
+# @cross_origin()
+# def send_action():
+#     uri = "mongodb://tianyumongo:VvzxetVYlugFvqcvGeQFsY0roLS4Wy90VzwdPVf10jqnhds4ND8zoQrSOBbZvlWewJmFaff9uDxC73ZXfOovXw==@tianyumongo.mongo.cosmos.azure.com:10255/?ssl=true&retrywrites=false&replicaSet=globaldb&maxIdleTimeMS=120000&appName=@tianyumongo@"
+#     client = pymongo.MongoClient(uri)
+#
+#     mydb = client["test-database"]
+#
+#     list_of_dict = json.load(StringIO(request.data.decode('utf-8')))
+#
+#     if len(list_of_dict['data']) == 0:
+#         return 'no data'
+#     else:
+#         session_id = uuid.uuid4()
+#         mycol = mydb[list_of_dict['source']]
+#         for dict in list_of_dict['data']:
+#             # print(dict.dtype)
+#             dict['sessionID'] = session_id
+#             mycol.insert_one(copy.deepcopy(dict))
+#         return 'success'
 
 if __name__ == "__main__":
     app.run(host = '0.0.0.0')
