@@ -6,7 +6,7 @@ import numpy as np
 import json
 from io import StringIO
 import copy
-import sys
+import os
 import uuid
 
 app = Flask(__name__)
@@ -25,7 +25,7 @@ class MyEncoder(json.JSONEncoder):
 @app.route('/', methods=['POST'])
 @cross_origin()
 def send_event():
-    uri = "mongodb://tianyumongo:VvzxetVYlugFvqcvGeQFsY0roLS4Wy90VzwdPVf10jqnhds4ND8zoQrSOBbZvlWewJmFaff9uDxC73ZXfOovXw==@tianyumongo.mongo.cosmos.azure.com:10255/?ssl=true&retrywrites=false&replicaSet=globaldb&maxIdleTimeMS=120000&appName=@tianyumongo@"
+    uri = "mongodb://internal-data:GUM19yVjC6KJdOX2n1uxyf9lhRJrW1bzyWvDwM7Z5g1y2W5IZM0Z7hexiVBgb8viKH0blNDOpYGRDlec7acaCA==@internal-data.mongo.cosmos.azure.com:10255/?ssl=true&retrywrites=false&replicaSet=globaldb&maxIdleTimeMS=120000&appName=@internal-data@"
     client = pymongo.MongoClient(uri)
 
     mydb = client["test-database"]
@@ -35,7 +35,7 @@ def send_event():
 
     if len(list_of_dict['data']) == 0:
         response =  jsonify(message="no data")
-        response.headers.add("Access-Control-Allow-Origin", "*")
+        # response.headers.add("Access-Control-Allow-Origin", "*")
         return response
     else:
         session_id = uuid.uuid4()
@@ -45,13 +45,13 @@ def send_event():
             dict['sessionID'] = session_id
             mycol.insert_one(copy.deepcopy(dict))
         response = jsonify(message="success")
-        response.headers.add("Access-Control-Allow-Origin", "*")
+        # response.headers.add("Access-Control-Allow-Origin", "*")
         return response
 
 
-@app.route('/test', methods=['GET'])
+@app.route('/', methods=['GET'])
 def test_retrieve():
-    uri = "mongodb://tianyumongo:VvzxetVYlugFvqcvGeQFsY0roLS4Wy90VzwdPVf10jqnhds4ND8zoQrSOBbZvlWewJmFaff9uDxC73ZXfOovXw==@tianyumongo.mongo.cosmos.azure.com:10255/?ssl=true&retrywrites=false&replicaSet=globaldb&maxIdleTimeMS=120000&appName=@tianyumongo@"
+    uri = "mongodb://internal-data:GUM19yVjC6KJdOX2n1uxyf9lhRJrW1bzyWvDwM7Z5g1y2W5IZM0Z7hexiVBgb8viKH0blNDOpYGRDlec7acaCA==@internal-data.mongo.cosmos.azure.com:10255/?ssl=true&retrywrites=false&replicaSet=globaldb&maxIdleTimeMS=120000&appName=@internal-data@"
     client = pymongo.MongoClient(uri)
 
     mydb = client["test-database"]
@@ -97,4 +97,5 @@ def test_retrieve():
 #         return 'success'
 
 if __name__ == "__main__":
-    app.run(host = '0.0.0.0')
+    port = int(os.environ.get("PORT", 5000))
+    app.run(debug=True, host='0.0.0.0', port=port)
